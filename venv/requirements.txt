@@ -1,0 +1,10 @@
+flask
+scikit-learn
+pandas
+numpy
+streamlit
+openai
+requests
+python-dotenv
+speechrecognition
+
