@@ -5,12 +5,11 @@ import traceback
 
 app = Flask(__name__)
 
-# Load Model, Vectorizer & LabelEncoder
 model = joblib.load("model/mood_classifier.pkl")
 vectorizer = joblib.load("model/tfidf_vectorizer.pkl")
 label_encoder = joblib.load("model/label_encoder.pkl")
 
-# Load the labeled songs dataset
+# ✅ Load the labeled songs dataset
 songs_df = pd.read_csv("data/labeled_songs.csv")
 
 @app.route('/')
@@ -33,6 +32,18 @@ def predict_mood():
         prediction = model.predict(input_vector)
         predicted_label = label_encoder.inverse_transform(prediction)[0]
 
+        
+        
+        mood_mapping = {
+            "joy": "happy",
+            "anger": "energetic",
+            "sadness": "sad",
+            "neutral": "calm",
+            "fear": "calm",
+            "surprise": "energetic"
+        }
+        mapped_mood = mood_mapping.get(predicted_label, predicted_label)
+
         # Filter songs based on predicted mood
         filtered_songs = songs_df[songs_df['mood'] == predicted_label]
 
@@ -40,7 +51,8 @@ def predict_mood():
         top_songs = filtered_songs.sample(n=min(5, len(filtered_songs)))
 
         # Format response
-        song_list = top_songs[["song_name", "artist_name", "mood"]].to_dict(orient="records")
+        song_list = top_songs[["track_name", "artists", "mood"]].to_dict(orient="records")
+    
 
         return jsonify({
             "predicted_mood": predicted_label,
