@@ -1,0 +1,40 @@
+/* style.css */
+/* Background gradient */
+body {
+    background: linear-gradient(120deg, #a1c4fd, #c2e9fb);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* App title and headers */
+h1 {
+    color: #1f2937;
+    text-align: center;
+}
+
+h2, h3, .stSubheader {
+    color: #111827;
+}
+
+/* Button styling */
+.stButton > button {
+    background-color: #2563eb;
+    color: white;
+    font-weight: bold;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+}
+
+/* Text input box */
+.stTextInput > div > div > input {
+    border-radius: 10px;
+    padding: 0.5rem;
+}
+
+/* Song card style */
+.song-card {
+    background-color: white;
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 0.5rem 0;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}

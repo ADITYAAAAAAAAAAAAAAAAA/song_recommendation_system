@@ -5,12 +5,15 @@ import traceback
 
 app = Flask(__name__)
 
+# Load trained components
 model = joblib.load("model/mood_classifier.pkl")
 vectorizer = joblib.load("model/tfidf_vectorizer.pkl")
 label_encoder = joblib.load("model/label_encoder.pkl")
 
-# ✅ Load the labeled songs dataset
-songs_df = pd.read_csv("data/labeled_songs.csv")
+# Load labeled song data
+songs_df = pd.read_csv("data/labeled_songs.csv")  # ✅ Update the path
+songs_df['mood'] = songs_df['mood'].str.strip().str.lower()  # ✅ Clean moods
+
 
 @app.route('/')
 def index():
@@ -25,15 +28,14 @@ def predict_mood():
         if not user_input:
             return jsonify({"error": "No input provided"}), 400
 
-        # Vectorize user input
+        # Vectorize input
         input_vector = vectorizer.transform([user_input])
 
         # Predict mood
         prediction = model.predict(input_vector)
         predicted_label = label_encoder.inverse_transform(prediction)[0]
 
-        
-        
+        # Map predicted label to mood in song dataset
         mood_mapping = {
             "joy": "happy",
             "anger": "energetic",
@@ -44,18 +46,21 @@ def predict_mood():
         }
         mapped_mood = mood_mapping.get(predicted_label, predicted_label)
 
-        # Filter songs based on predicted mood
-        filtered_songs = songs_df[songs_df['mood'] == predicted_label]
+        # Filter songs
+        filtered_songs = songs_df[songs_df['mood'].str.lower() == mapped_mood.lower()]
 
-        # Pick top 5 songs
+        if filtered_songs.empty:
+            return jsonify({
+                "predicted_mood": mapped_mood,
+                "recommended_songs": [],
+                "message": "No songs found for this mood"
+            })
+
         top_songs = filtered_songs.sample(n=min(5, len(filtered_songs)))
-
-        # Format response
         song_list = top_songs[["track_name", "artists", "mood"]].to_dict(orient="records")
-    
 
         return jsonify({
-            "predicted_mood": predicted_label,
+            "predicted_mood": mapped_mood,
             "recommended_songs": song_list
         })
 
@@ -65,5 +70,6 @@ def predict_mood():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
     
